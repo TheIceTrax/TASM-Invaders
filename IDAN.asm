@@ -363,6 +363,7 @@ start:
 		CMP		CL, GamePlayerBulletsLimit
 		JAE		PlayerShootEnd
 		
+		SHL		CL, 1 ; Beacuse GamePlayerBulletsPosX/Y is DW, multiplies by 2
 		INC		[GamePlayerCurrentBullets]
 		
 		;Calculate X position
@@ -409,12 +410,11 @@ start:
 		MOV		CL, [GamePlayerCurrentBullets]
 		CMP		CL, 0
 		JZ		MovePlayerBulletEnd
-		MOV		CL, GamePlayerBulletsLimit
+		MOV		CL, 0
 		MovePlayerBulletLoop:
 			;CLEAR THE BULLET
 			MOV		DI, OFFSET GamePlayerBulletsPosX
 			ADD		DI, CX
-			DEC		DI
 			MOV		DX, [DI]
 			
 			CMP		DX, GamePlayerBulletDeletedFlagPos
@@ -424,7 +424,6 @@ start:
 			
 			MOV		DI, OFFSET GamePlayerBulletsPosY
 			ADD		DI, CX
-			DEC		DI
 			MOV		DX, [DI]
 			
 			PUSH	DI
@@ -456,16 +455,18 @@ start:
 			MovePlayerBulletDeleteBullet:
 				MOV		DI, OFFSET GamePlayerBulletsPosX
 				ADD		DI, CX
-				DEC		DI
 				MOV		[DI], GamePlayerBulletDeletedFlagPos
 			
 				MOV		DI, OFFSET GamePlayerBulletsPosY
 				ADD		DI, CX
-				DEC		DI
 				MOV		[DI], GamePlayerBulletDeletedFlagPos
+				
 				DEC		[GamePlayerCurrentBullets]
 			MovePlayerBulletLoopEnd:
-				LOOP	MovePlayerBulletLoop
+				ADD		CL, 2D
+				CMP		CL, GamePlayerBulletsLimit ; END CONDITION
+				JBE		MovePlayerBulletLoop
+				;LOOP		MovePlayerBulletLoop
 			
 		MovePlayerBulletEnd:
 			POPA
