@@ -1,0 +1,83 @@
+;			TITLE SCREEN VARIABLES
+TitleScreenMessage DB 	"________________________________________________________________________",10,13,"				WELCOME!",10,13,10,13,'$'
+TitleScreenStart DB 	"			1 - Start game!",10,13,'$'
+TitleScreenHelp DB 		"			2 - How do i play?",10,13, '$'
+TitleScreenExit DB 		"			3 - Exit",10,13,'$'
+
+TitleScreenStartCHR EQU '1'
+TitleScreenHelpCHR EQU '2'
+TitleScreenExitCHR EQU '3'
+
+;		GAME VARIABLES
+;GAME
+GameBorderStartX EQU 0D
+GameBorderEndX EQU 298D
+GameBorderStartY EQU 0
+
+BackgroundColor EQU 0D
+;Player
+GamePlayerPosX DW 160D
+GamePlayerPosY DW 170D
+GamePlayerSizeX  EQU 18D
+GamePlayerSizeY  EQU 9D
+GamePlayerSpeed DW 2D
+GamePlayerClear DB 0D
+
+;Player Bullet
+GamePlayerCurrentBullets DB 0
+GamePlayerBulletsLimit DB 5
+
+GamePlayerBulletsPosX DW 5 DUP(0)
+GamePlayerBulletsPosY DW 5 DUP(0)
+
+GamePlayerBulletMarginY EQU 5D ;Some small corrections to bullet position calculation
+GamePlayerBulletMarginX EQU 1D
+
+GamePlayerBulletSizeX EQU 4D
+GamePlayerBulletSizeY EQU 10D
+
+GamePlayerBulletTimer DW 0			;Probably useless, will get deleted if needed
+GamePlayerBulletDelay EQU 2000D
+
+GamePlayerBulletSpeed EQU 1
+GamePlayerBulletDeletedFlagPos EQU 0
+;Enemy
+GameEnemySizeX DW 22D
+GameEnemySizeY DW 18D
+
+GameEnemyFirstX DW 0D
+GameEnemyFirstY DW 0D
+
+GameEnemyMarginX DW 10D
+GameEnemyMarginY DW 30D
+
+GameEnemyFirstDirection DB 0 ; 1 - left, 0 - right
+
+GameEnemyCount DB 12D
+GameEnemyStartingAmmount DB 12D
+
+GameEnemySpeed EQU 3D
+
+GameEnemyMovemntCycles EQU 20000D
+GameEnemyCurrentMovementCycles DW 0D
+
+DrawEnemiesClear DB 0D
+
+;An array of all the statusses of the enemies(dead or alive) by positions
+GameEnemiesStatus DB 1 dup (12)
+
+;General
+PixelX dw 0
+PixelY dw 0
+color db ?
+Draw2DSizeX  dw ?
+Draw2DSizeY  dw ?
+Draw2DPosX  dw ?
+Draw2DPosY  dw ?
+Draw2DClear db 0
+
+CLOCK EQU es:6Ch
+RIGHT_KEY EQU 77D
+LEFT_KEY  EQU 75D
+ESC_KEY  EQU 1D
+SPACEBAR EQU 39H
