@@ -445,8 +445,8 @@ start:
 			MOV		DX, [DI]
 			CMP		DX, GameBorderStartY
 			JL		MovePlayerBulletDeleteBullet
-			;Can move the bullet
 
+			;Can move the bullet
 			MOV		[Draw2DPosY], DX
 			MOV		[Draw2DClear], 0D
 			MOV		SI, OFFSET PlayerBullet
@@ -460,13 +460,14 @@ start:
 				MOV		DI, OFFSET GamePlayerBulletsPosY
 				ADD		DI, CX
 				MOV		[DI], GamePlayerBulletDeletedFlagPos
-				
+
 				DEC		[GamePlayerCurrentBullets]
 			MovePlayerBulletLoopEnd:
 				ADD		CL, 2D
-				CMP		CL, GamePlayerBulletsLimit ; END CONDITION
+				MOV		DL, [GamePlayerBulletsLimit]
+				;SHL		DL, 1
+				CMP		CL,  DL ;If not the last bullet, loop
 				JBE		MovePlayerBulletLoop
-				;LOOP		MovePlayerBulletLoop
 			
 		MovePlayerBulletEnd:
 			POPA
