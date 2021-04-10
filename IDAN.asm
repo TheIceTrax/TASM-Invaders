@@ -361,7 +361,7 @@ start:
 		XOR 	CH, CH
 		MOV		CL, [GamePlayerCurrentBullets]
 		CMP		CL, GamePlayerBulletsLimit
-		JAE		PlayerShootEnd
+		JGE		PlayerShootEnd
 		
 		SHL		CL, 1 ; Beacuse GamePlayerBulletsPosX/Y is DW, multiplies by 2
 		INC		[GamePlayerCurrentBullets]
@@ -373,17 +373,24 @@ start:
 		ADD		DX, [GamePlayerPosX]
 		SUB		DX, GamePlayerBulletMarginX
 		
-		MOV		DI, OFFSET GamePlayerBulletsPosX
-		ADD		DI, CX
-		MOV		[DI], DX
+		;Calculate the next free space
+		MOV		SI, OFFSET GamePlayerBulletsPosX
+		MOV		AX, 0002D
+		MOV		BH, 1D ;DW Flag in malloc
+		CALL	Malloc
+		;Move values to memory
+		MOV		[SI], DX
 		MOV		[Draw2DPosX], DX
+		;Calculate the delta between the adresses, to avoid calling malloc again
+		SUB		SI, OFFSET GamePlayerBulletsPosX
+		MOV		CX, SI
 		
-		;Calculate Y position
+		
+		;Calculate Y position and move to memory
 
 		MOV		DX, [GamePlayerPosY]
 		SUB		DX, GamePlayerSizeY
 		SUB		DX, GamePlayerBulletMarginY
-		
 		MOV		DI, OFFSET GamePlayerBulletsPosY
 		ADD		DI, CX
 		MOV		[DI], DX
@@ -465,9 +472,9 @@ start:
 			MovePlayerBulletLoopEnd:
 				ADD		CL, 2D
 				MOV		DL, [GamePlayerBulletsLimit]
-				;SHL		DL, 1
+				SHL		DL, 1
 				CMP		CL,  DL ;If not the last bullet, loop
-				JBE		MovePlayerBulletLoop
+				JL		MovePlayerBulletLoop
 			
 		MovePlayerBulletEnd:
 			POPA
@@ -533,4 +540,48 @@ start:
 		POPA
 		RET
 	ENDP
+
+	;/------------------------------------------------------------------\
+	;|							Malloc									|
+	;| 			Get a pointer to the first block of memory				|
+	;| 			after SI That has at least AX ammount of free bytes		|
+	;|							ARGUMENTS:								|
+	;| SI - The starting location to search for							|
+	;| AX - The number of bytes required								|
+	;| BH - 0 - DB, 1 - DW												|
+	;| 							RETURNS:								|
+	;| SI - The starting location of the block							|
+	;\------------------------------------------------------------------/
+	PROC Malloc
+		;Push registers that will be used
+		PUSH	CX
+		PUSH	BX
+		PUSH	DI
+		;Start of malloc procedure
+		XOR		BL,BL
+		MallocCheck:
+			MOV		DI, SI
+			MOV		CX, AX
+			MallocCheckLoop:
+				CMP		BL, [DI]
+				JNE		MallocCurrentFail
+				INC		DI
+				LOOP	MallocChecklOOP
+			;Succsesfully found
+			JMP		MallocEnd
+		MallocCurrentFail:
+			CMP		BH, 1
+			JE		MallocCurrentFailDW
+			INC 	SI
+			JMP		MallocCheck
+			MallocCurrentFailDW:
+			ADD		SI, 2
+			JMP		MallocCheck
+		MallocEnd:
+			;Pop the registers
+			POP		DI
+			POP		BX
+			POP		CX
+			RET
+	ENDP Malloc
 END		start

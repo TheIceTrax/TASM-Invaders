@@ -25,10 +25,12 @@ GamePlayerClear DB 0D
 
 ;Player Bullet
 GamePlayerCurrentBullets DB 0
-GamePlayerBulletsLimit DB 5
+GamePlayerBulletsLimit DB 4
 
-GamePlayerBulletsPosX DW 5 DUP(0)
-GamePlayerBulletsPosY DW 5 DUP(0)
+GamePlayerBulletDeletedFlagPos EQU 0
+
+GamePlayerBulletsPosX DW 4 DUP(0) 
+GamePlayerBulletsPosY DW 4 DUP(0) 
 
 GamePlayerBulletMarginY EQU 5D ;Some small corrections to bullet position calculation
 GamePlayerBulletMarginX EQU 1D
@@ -40,7 +42,6 @@ GamePlayerBulletTimer DW 0			;Probably useless, will get deleted if needed
 GamePlayerBulletDelay EQU 2000D
 
 GamePlayerBulletSpeed EQU 1
-GamePlayerBulletDeletedFlagPos EQU 0
 ;Enemy
 GameEnemySizeX DW 22D
 GameEnemySizeY DW 18D
