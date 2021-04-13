@@ -25,12 +25,12 @@ GamePlayerClear DB 0D
 
 ;Player Bullet
 GamePlayerCurrentBullets DB 0
-GamePlayerBulletsLimit DB 4
+GamePlayerBulletsLimit DB 5
 
 GamePlayerBulletDeletedFlagPos EQU 0
 
-GamePlayerBulletsPosX DW 4 DUP(0) 
-GamePlayerBulletsPosY DW 4 DUP(0) 
+GamePlayerBulletsPosX DW 5 DUP(0) 
+GamePlayerBulletsPosY DW 5 DUP(0) 
 
 GamePlayerBulletMarginY EQU 5D ;Some small corrections to bullet position calculation
 GamePlayerBulletMarginX EQU 1D

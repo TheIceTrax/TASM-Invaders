@@ -566,7 +566,7 @@ start:
 				CMP		BL, [DI]
 				JNE		MallocCurrentFail
 				INC		DI
-				LOOP	MallocChecklOOP
+				LOOP	MallocCheckLoop
 			;Succsesfully found
 			JMP		MallocEnd
 		MallocCurrentFail:
