@@ -25,12 +25,12 @@ GamePlayerClear DB 0D
 
 ;Player Bullet
 GamePlayerCurrentBullets DB 0
-GamePlayerBulletsLimit DB 5
+GamePlayerBulletsLimit EQU 5
 
 GamePlayerBulletDeletedFlagPos EQU 0
 
-GamePlayerBulletsPosX DW 5 DUP(0) 
-GamePlayerBulletsPosY DW 5 DUP(0) 
+GamePlayerBulletsPosX DW GamePlayerBulletsLimit DUP(GamePlayerBulletDeletedFlagPos) 
+GamePlayerBulletsPosY DW GamePlayerBulletsLimit DUP(GamePlayerBulletDeletedFlagPos) 
 
 GamePlayerBulletMarginY EQU 5D ;Some small corrections to bullet position calculation
 GamePlayerBulletMarginX EQU 1D
@@ -54,8 +54,11 @@ GameEnemyMarginY DW 30D
 
 GameEnemyFirstDirection DB 0 ; 1 - left, 0 - right
 
-GameEnemyCount DB 12D
-GameEnemyStartingAmmount DB 12D
+GameEnemyStartingAmmount EQU 12D
+GameEnemyCount DB GameEnemyStartingAmmount
+
+GameEnemiesPosX DW GameEnemyStartingAmmount DUP(0) ;Doesn't really matter, values will get wiped the moment the game starts
+GameEnemiesPosY DW GameEnemyStartingAmmount DUP(0)
 
 GameEnemySpeed EQU 3D
 
@@ -63,9 +66,6 @@ GameEnemyMovemntCycles EQU 20000D
 GameEnemyCurrentMovementCycles DW 0D
 
 DrawEnemiesClear DB 0D
-
-;An array of all the statusses of the enemies(dead or alive) by positions
-GameEnemiesStatus DB 1 dup (12)
 
 ;General
 PixelX dw 0

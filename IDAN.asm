@@ -261,10 +261,10 @@ start:
 		
 		XOR		BX, BX
 		MOV		BL,	[GameEnemyFirstDirection]
-		
+		MOV		[GameEnemiesPosPointer], 0D ;Reset the pointer
 		;Loop of enemies
 		XOR		CX,CX
-		MOV		CL,	[GameEnemyStartingAmmount]
+		MOV		CL,	GameEnemyStartingAmmount
 		;Move to Draw2D variables the sizes and positions of the enemies
 		MOV		DX, [GameEnemyFirstX]
 		MOV		[Draw2DPosX], DX
@@ -317,8 +317,23 @@ start:
 					ADD		[Draw2DPosY],DX
 				
 				DrawEnemiesLoopLoop:
-					CALL Draw2D
-					LOOP DrawEnemiesDrawLoop
+					CALL 	Draw2D
+					PUSH 	DI
+					PUSH	DX
+					MOV		DI,	OFFSET GameEnemiesPosX
+					ADD		DI,	GameEnemiesPosPointer
+					MOV		DX, [Draw2DPosX]
+					MOV		[DI], DX
+
+					MOV		DI, OFFSET GameEnemiesPosY
+					ADD		DI, GameEnemiesPosPointer
+					MOV		DX, [Draw2DPosY]
+					MOV		[DI], DX
+					
+					ADD 	[GameEnemiesPosPointer],2
+					POP		DX
+					POP		DI
+					LOOP 	DrawEnemiesDrawLoop
 		POPA
 		RET
 	ENDP DrawEnemies
@@ -471,7 +486,7 @@ start:
 				DEC		[GamePlayerCurrentBullets]
 			MovePlayerBulletLoopEnd:
 				ADD		CL, 2D
-				MOV		DL, [GamePlayerBulletsLimit]
+				MOV		DL, GamePlayerBulletsLimit
 				SHL		DL, 1
 				CMP		CL,  DL ;If not the last bullet, loop
 				JL		MovePlayerBulletLoop
