@@ -59,7 +59,9 @@ GameEnemyCount DB GameEnemyStartingAmmount
 
 GameEnemiesPosX DW GameEnemyStartingAmmount DUP(0) ;Doesn't really matter, values will get wiped the moment the game starts
 GameEnemiesPosY DW GameEnemyStartingAmmount DUP(0)
+GameEnemiesLowestEnemy DW 0
 
+GameEnemiesPosPointer DW 0;Waste of memory but it is required in order to work with DI
 GameEnemySpeed EQU 3D
 
 GameEnemyMovemntCycles EQU 20000D

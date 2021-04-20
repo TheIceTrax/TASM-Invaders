@@ -315,11 +315,11 @@ start:
 					XOR		BL, 1; Swap direction
 					MOV		DX,	[GameEnemyMarginY]
 					ADD		[Draw2DPosY],DX
+					MOV		[GameEnemiesLowestEnemy], DX
 				
 				DrawEnemiesLoopLoop:
 					CALL 	Draw2D
-					PUSH 	DI
-					PUSH	DX
+					
 					MOV		DI,	OFFSET GameEnemiesPosX
 					ADD		DI,	GameEnemiesPosPointer
 					MOV		DX, [Draw2DPosX]
@@ -330,13 +330,35 @@ start:
 					MOV		DX, [Draw2DPosY]
 					MOV		[DI], DX
 					
-					ADD 	[GameEnemiesPosPointer],2
-					POP		DX
-					POP		DI
+					ADD 	[GameEnemiesPosPointer], 2
+					
 					LOOP 	DrawEnemiesDrawLoop
 		POPA
 		RET
 	ENDP DrawEnemies
+	;Checks the collision of the enemies with the player's bullet
+	;If it does, will remove the enemy.
+	PROC EnemiesCollision
+		PUSHA
+		MOV		CX, GamePlayerBulletsLimit
+		EnemiesCollisionLoop:
+			MOV		DI, OFFSET GamePlayerBulletsPosY
+			ADD		DI, CL
+			ADD		DI, CL;Because of DW
+			
+			MOV		DX, [GameEnemiesLowestEnemy]
+			CMP		[DI],DX
+			JAE 	EnemiesCollisionLoopEnd ;if the bullet has not reached the lowest enemy, skip the check
+
+			;Could be collided
+			EnemiesCollisionLoopCheckEnemies:
+				MOV		SI, OFFSET 
+
+			EnemiesCollisionLoop:
+				LOOP	EnemiesCollisionLoop
+		POPA
+		RET
+	ENDP EnemiesCollision
 	;/------------------------------------------------------------------\
 	;|							DrawPlayer								|
 	;| 				Draws the player in PlayerX,PlayerY					|
