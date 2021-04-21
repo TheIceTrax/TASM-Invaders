@@ -1,7 +1,7 @@
 IDEAL
     MODEL small
     STACK 100h
-    p386
+    p486
 DATASEG
 	INCLUDE	"IMAGES.DAT"
 	INCLUDE	"VARS.DAT"
@@ -276,6 +276,7 @@ start:
 		MOV		[Draw2DClear], DL
 		
 		DrawEnemiesDrawLoop:
+
 			LEA 	SI, [EnemyModel]
 			
 			MOV		DX,	[Draw2DPosX]
@@ -318,10 +319,11 @@ start:
 					MOV		[GameEnemiesLowestEnemy], DX
 				
 				DrawEnemiesLoopLoop:
-					CALL 	Draw2D
 					
 					MOV		DI,	OFFSET GameEnemiesPosX
 					ADD		DI,	GameEnemiesPosPointer
+					CMP		[DI], GameEnemyDeadFlag
+					CALL 	Draw2D
 					MOV		DX, [Draw2DPosX]
 					MOV		[DI], DX
 
@@ -329,10 +331,10 @@ start:
 					ADD		DI, GameEnemiesPosPointer
 					MOV		DX, [Draw2DPosY]
 					MOV		[DI], DX
-					
-					ADD 	[GameEnemiesPosPointer], 2
-					
-					LOOP 	DrawEnemiesDrawLoop
+							
+					DrawEnemiesLoopLoopEnd:
+						ADD 	[GameEnemiesPosPointer], 2
+						LOOP 	DrawEnemiesDrawLoop
 		POPA
 		RET
 	ENDP DrawEnemies
@@ -343,18 +345,39 @@ start:
 		MOV		CX, GamePlayerBulletsLimit
 		EnemiesCollisionLoop:
 			MOV		DI, OFFSET GamePlayerBulletsPosY
-			ADD		DI, CL
-			ADD		DI, CL;Because of DW
+			ADD		DI, CX
+			ADD		DI, CX;Because of DW
 			
 			MOV		DX, [GameEnemiesLowestEnemy]
 			CMP		[DI],DX
 			JAE 	EnemiesCollisionLoopEnd ;if the bullet has not reached the lowest enemy, skip the check
-
+			
 			;Could be collided
-			EnemiesCollisionLoopCheckEnemies:
-				MOV		SI, OFFSET 
+			EnemiesCollisionLoopCheckEnemiesLoop:
+				;SI - Enemy position pointer
+				;DI - bullet pointer
+				;DX - player values
+				;BX - enemy values
 
-			EnemiesCollisionLoop:
+				;Much more efficent to first check X then y than the other way around.
+				MOV		DI, OFFSET GamePlayerBulletsPosX
+				ADD		DI, CX
+				ADD		DI, CX
+				MOV		DX, [DI]
+
+				;If bullet does not exist
+				CMP		DX, GamePlayerBulletDeletedFlagPos
+				JE		EnemiesCollisionLoopCheckEnemiesLoopEnd
+
+				MOV		SI, OFFSET GameEnemiesPosX
+
+				MOV		BX, [SI]
+				CMP		BX,	DX 
+				JB		EnemiesCollisionLoopCheckEnemiesLoopEnd ;too left for
+
+				EnemiesCollisionLoopCheckEnemiesLoopEnd:
+					LOOP	EnemiesCollisionLoopCheckEnemiesLoop
+			EnemiesCollisionLoopEnd:
 				LOOP	EnemiesCollisionLoop
 		POPA
 		RET
