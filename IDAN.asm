@@ -276,7 +276,6 @@ start:
 		MOV		[Draw2DClear], DL
 		
 		DrawEnemiesDrawLoop:
-
 			LEA 	SI, [EnemyModel]
 			
 			MOV		DX,	[Draw2DPosX]
@@ -321,20 +320,28 @@ start:
 				DrawEnemiesLoopLoop:
 					
 					MOV		DI,	OFFSET GameEnemiesPosX
-					ADD		DI,	GameEnemiesPosPointer
+					ADD		DI,	[GameEnemiesPosPointer]
 					CMP		[DI], GameEnemyDeadFlag
+					JE		DrawEnemiesLoopLoopEnd
 					CALL 	Draw2D
 					MOV		DX, [Draw2DPosX]
 					MOV		[DI], DX
 
 					MOV		DI, OFFSET GameEnemiesPosY
-					ADD		DI, GameEnemiesPosPointer
+					ADD		DI, [GameEnemiesPosPointer]
 					MOV		DX, [Draw2DPosY]
 					MOV		[DI], DX
 							
 					DrawEnemiesLoopLoopEnd:
 						ADD 	[GameEnemiesPosPointer], 2
-						LOOP 	DrawEnemiesDrawLoop
+
+						CMP		CX, 1
+						JE		DrawEnemiesEnd
+						DEC		CX
+						;Bypass conditonal jump limit
+						JMP		DrawEnemiesDrawLoop
+		DrawEnemiesEnd:
+		
 		POPA
 		RET
 	ENDP DrawEnemies
@@ -343,6 +350,7 @@ start:
 	PROC EnemiesCollision
 		PUSHA
 		MOV		CX, GamePlayerBulletsLimit
+		SHL		CX,1 ;Multiply by 2, sience the loop will decrease by 2 each iteration
 		EnemiesCollisionLoop:
 			MOV		DI, OFFSET GamePlayerBulletsPosY
 			ADD		DI, CX
@@ -351,34 +359,82 @@ start:
 			MOV		DX, [GameEnemiesLowestEnemy]
 			CMP		[DI],DX
 			JAE 	EnemiesCollisionLoopEnd ;if the bullet has not reached the lowest enemy, skip the check
-			
-			;Could be collided
+			MOV		BX, GameEnemyStartingAmmount	
+			SHL		BX, 1		
 			EnemiesCollisionLoopCheckEnemiesLoop:
 				;SI - Enemy position pointer
 				;DI - bullet pointer
-				;DX - player values
-				;BX - enemy values
+				;BX - Enemy counter
+				;DX - General Values
 
 				;Much more efficent to first check X then y than the other way around.
-				MOV		DI, OFFSET GamePlayerBulletsPosX
-				ADD		DI, CX
-				ADD		DI, CX
-				MOV		DX, [DI]
+				;MOV		DI, OFFSET GamePlayerBulletsPosX
+				;ADD		DI, CX
+				;ADD		DI, CX
+				
+				;;If bullet does not exist
+				;CMP		[DI], GamePlayerBulletDeletedFlagPos
+				;JE		EnemiesCollisionLoopCheckEnemiesLoopEnd
+;
+				;MOV		SI, OFFSET GameEnemiesPosX
+				;ADD		SI, BX
+;
+				;;Check if enemy is alive
+				;CMP		[SI],GameEnemyDeadFlag
+				;JE		EnemiesCollisionLoopCheckEnemiesLoopEnd
+				;MOV		DX, [SI]
+				;CMP		[DI],	DX 
+				;JB		EnemiesCollisionLoopCheckEnemiesLoopEnd
+;
+				;ADD		DX, GameEnemySizeX
+				;CMP		DX, BX
+				;JA		EnemiesCollisionLoopCheckEnemiesLoopEnd
 
-				;If bullet does not exist
-				CMP		DX, GamePlayerBulletDeletedFlagPos
-				JE		EnemiesCollisionLoopCheckEnemiesLoopEnd
+				;TODO: Rework logic to collide
 
-				MOV		SI, OFFSET GameEnemiesPosX
+				EnemiesCollisionCheckY:
+					MOV		DI, GamePlayerBulletsPosY
+					ADD		DI, CX
+					ADD		DI, CX
+					
+					MOV		SI, OFFSET GameEnemiesPosX
+					ADD		SI,	BX
+					MOV		DX, [SI]
+					ADD		DX, GameEnemySizeY
+					;DX = Bottom Y coordinate of enemy
+					;[DI] = Top Y coordinate of bullet
+					CMP		DX,[DI]
+					JA		EnemiesCollisionLoopCheckEnemiesLoopEnd
 
-				MOV		BX, [SI]
-				CMP		BX,	DX 
-				JB		EnemiesCollisionLoopCheckEnemiesLoopEnd ;too left for
+					MOV		DX, [DI]
+					ADD		DX, GamePlayerBulletSizeY
+					;DX = Bottom Y coordinate of bullet
+					;[SI] = Top Y coordinate of enemy
+					CMP		DX, [SI]
+					JB		EnemiesCollisionLoopCheckEnemiesLoopEnd
+
+					EnemiesCollisionCollide:
+						MOV		[DI], GamePlayerBulletDeletedFlagPos
+						MOV		DI, OFFSET GamePlayerBulletsPosY
+						ADD		DI, CX
+						MOV		[DI], GamePlayerBulletDeletedFlagPos
+
+						MOV		[SI], GameEnemyDeadFlag
+						MOV		SI, OFFSET GameEnemiesPosY
+						ADD		SI, BX
+						MOV		[SI], GameEnemyDeadFlag
+					
 
 				EnemiesCollisionLoopCheckEnemiesLoopEnd:
-					LOOP	EnemiesCollisionLoopCheckEnemiesLoop
+					SUB		BX, 2
+					CMP		BX, 1
+					JGE		EnemiesCollisionLoopCheckEnemiesLoop
 			EnemiesCollisionLoopEnd:
-				LOOP	EnemiesCollisionLoop
+				CMP		CX, 1
+				JL		EnemiesCollisionEnd
+				SUB		CX,2
+				JMP		EnemiesCollisionLoop
+		EnemiesCollisionEnd:
 		POPA
 		RET
 	ENDP EnemiesCollision
@@ -477,6 +533,7 @@ start:
 		MOV		CL, [GamePlayerCurrentBullets]
 		CMP		CL, 0
 		JZ		MovePlayerBulletEnd
+		CALL	EnemiesCollision
 		MOV		CL, 0
 		MovePlayerBulletLoop:
 			;CLEAR THE BULLET

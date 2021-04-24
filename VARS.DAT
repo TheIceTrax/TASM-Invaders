@@ -57,8 +57,8 @@ GameEnemyFirstDirection DB 0 ; 1 - left, 0 - right
 GameEnemyStartingAmmount EQU 12D
 GameEnemyCount DB GameEnemyStartingAmmount
 
-GameEnemiesPosX DW GameEnemyStartingAmmount DUP(0) ;Doesn't really matter, values will get wiped the moment the game starts
-GameEnemiesPosY DW GameEnemyStartingAmmount DUP(0)
+GameEnemiesPosX DW GameEnemyStartingAmmount DUP(?) ;Doesn't really matter, values will get wiped the moment the game starts
+GameEnemiesPosY DW GameEnemyStartingAmmount DUP(?)
 GameEnemyDeadFlag EQU 1234 ;
 GameEnemiesLowestEnemy DW 0
 
