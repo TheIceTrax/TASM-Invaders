@@ -9,10 +9,14 @@ DATASEG
 CODESEG
 ;Menu Procedures
 PROC HelpMenu
+	PUSHA
 	XOR 	AX, AX
 	MOV		AH, 9H
 	MOV		DX, OFFSET Help_Title
 	INT 	21H
+	MOV		AH, 01D
+	INT 	21H
+	POPA
 	RET
 ENDP HelpMenu
 
@@ -204,7 +208,18 @@ PROC Game
 				GameEnemyMovementDraw:
 					CALL 	DrawEnemies
 			GameEnemyMovementHandlerEND:
+
+			GameCheckStatusHandler:
+				;If checked on each iteration, the game will lag significantly
+				INC		[GameCurrentStatusDelayCycles]
+				CMP		[GameCurrentStatusDelayCycles], GameStatusDelayCycles
+				JB		GameCheckStatusHandlerEND
+
+				MOV		[GameCurrentStatusDelayCycles], 0
+				CALL	CheckGameStatus
+			GameCheckStatusHandlerEND:	
 				JMP 	GamePlayerMovementHandler
+
 	RET
 ENDP Game
 ;START 	
@@ -223,12 +238,6 @@ start:
 	StartHelpMenu:
 		CALL	HelpMenu
 	Exit:
-			;READ KEY ===TEMP===
-			;MOV		AH, 0ch
-			;MOV		AL, 07h
-			;INT		21H
-			;IN 		AL,060h
-		;=====================
 		XOR		AX,	AX
 		MOV		AL, 2D
 		INT		10H
@@ -326,8 +335,8 @@ start:
 					MOV		[Draw2DPosX], AX
 					
 					XOR		BL, 1; Swap direction
-					MOV		DX,	GameEnemyMarginY
-					ADD		[Draw2DPosY],DX
+					ADD		[Draw2DPosY], GameEnemyMarginY
+					MOV		DX, [Draw2DPosY]	
 					MOV		[GameEnemiesLowestEnemy], DX
 				
 				DrawEnemiesLoopLoop:
@@ -478,11 +487,12 @@ start:
 						MOV		DX, [DI]
 						MOV		[Draw2DPosY], DX
 						MOV		[WORD PTR DI], GameEnemyDeadFlag
-
+						
 						MOV		[Draw2DSizeX], GameEnemySizeX
 						MOV		[Draw2DSizeY], GameEnemySizeY
 						;Draw2Dclear is already 1 in memory
 						CALL	Draw2D
+						DEC		[GameEnemyCount]
 
 
 				EnemiesCollisionLoopCheckEnemiesLoopEnd:
@@ -657,6 +667,56 @@ start:
 			POPA
 			RET
 	ENDP MovePlayerBullets
+	;Check if player has either won or lost
+	
+	PROC CheckGameStatus
+		PUSHA
+		;Check if player has won
+		CMP		[GameEnemyCount], 0
+		JE		CheckGameStatusPlayerWon
+
+		;Check if player has lost(enemies has reached the player on the Y axis)
+		MOV		DX, [GameEnemiesLowestEnemy]
+		ADD		DX,	GameEnemySizeY
+		MOV		DI,	OFFSET GamePlayerPosY
+		CMP		DX, [DI]
+		JAE		CheckGameStatusPlayerLost
+
+		;If neither happend
+		JMP		CheckGameStatusPlayerEnd
+		CheckGameStatusPlayerWon:
+			MOV		DX, 01D
+			CALL 	GameOver
+		CheckGameStatusPlayerLost:
+			MOV		DX, 00D
+			CALL 	GameOver
+		CheckGameStatusPlayerEnd:
+			POPA
+			RET
+	ENDP CheckGameStatus
+	;/------------------------------------------------------------------\
+	;|							GameOver								|
+	;| 						Finishes the game							|
+	;|							ARGUMENTS:								|
+	;| 				DX - Win/lose - 1 win, else lose					|
+	;\------------------------------------------------------------------/
+	PROC GameOver
+		MOV		AX, 0002D
+		INT		10H
+		MOV		AX, 0900H
+		CMP		DX, 01
+		JNE		GameOverLost	
+		GameOverWon:
+			MOV		DX, OFFSET PLAYER_WON
+			JMP		GameOverEnd
+		GameOverLost:
+			MOV		DX, OFFSET PLAYER_LOST
+		GameOverEnd:
+		INT		21H
+		MOV		AX, 0100H
+		INT 	21H
+		JMP		Exit
+	ENDP GameOver
 	;/------------------------------------------------------------------\
 	;|							Draw2D									|
 	;| 				Draws a 2D Array of a picture						|
