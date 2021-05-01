@@ -153,6 +153,9 @@ PROC Game
 			
 		GamePlayerShootingHandler:
 			GamePlayerShoot:
+				CMP		[GamePlayerShootingDelayCurrent], 0
+				JNE		GamePlayerMoveShots
+				MOV		[GamePlayerShootingDelayCurrent],GamePlayerShootingDelay
 				CALL PlayerShoot
 			GamePlayerMoveShots:
 				CMP		[GamePlayerBulletTimer], 0
@@ -162,7 +165,11 @@ PROC Game
 
 		GamePlayerShootingHandlerEnd:
 			DEC		[GamePlayerBulletTimer]
+			CMP		[GamePlayerShootingDelayCurrent], 0
+			JE		GameEnemyMovementHandler
+			DEC		[GamePlayerShootingDelayCurrent]
 		GameEnemyMovementHandler:
+		
 		;to not move the enemies at the speed of light
 			INC		[GameEnemyCurrentMovementCycles]
 			CMP		[GameEnemyCurrentMovementCycles], GameEnemyMovemntCycles
@@ -401,8 +408,8 @@ start:
 
 				EnemiesCollisionCheckY:
 					;Useless moving (already setted)
-					;MOV		DI, OFFSET GamePlayerBulletsPosY
-					;ADD		DI, CX	
+					MOV		DI, OFFSET GamePlayerBulletsPosY
+					ADD		DI, CX	
 
 					MOV		SI, OFFSET GameEnemiesPosY
 					ADD		SI,	BX
@@ -500,8 +507,8 @@ start:
 					CMP		BX, 0
 					JGE		EnemiesCollisionLoopCheckEnemiesLoop
 			EnemiesCollisionLoopEnd:
-				CMP		CX, 1
-				JLE		EnemiesCollisionEnd
+				CMP		CX, 0
+				JL		EnemiesCollisionEnd
 				SUB		CX,2
 				JMP		EnemiesCollisionLoop
 		EnemiesCollisionEnd:
@@ -513,7 +520,7 @@ start:
 	;| 				Draws the player in PlayerX,PlayerY					|
 	;|							ARGUMENTS:								|
 	;| [GamePlayerPosX] The x coordinate of the player					|
-	;| [GamePlayerPosY] The y coordinate of the player					|
+	;| GamePlayerPosY The y coordinate of the player					|
 	;| [GamePlayerClear] if 1D, will clear the player area				|
 	;\------------------------------------------------------------------/
 	PROC DrawPlayer
@@ -521,7 +528,7 @@ start:
 		MOV		DX, [GamePlayerPosX]
 		MOV		[Draw2DPosX], DX
 		
-		MOV		DX, [GamePlayerPosY]
+		MOV		DX, GamePlayerPosY
 		MOV		[Draw2DPosY], DX
 		
 		MOV		DX, GamePlayerSizeX
@@ -574,7 +581,7 @@ start:
 		
 		;Calculate Y position and move to memory
 
-		MOV		DX, [GamePlayerPosY]
+		MOV		DX, GamePlayerPosY
 		SUB		DX, GamePlayerSizeY
 		SUB		DX, GamePlayerBulletMarginY
 		MOV		DI, OFFSET GamePlayerBulletsPosY
@@ -678,8 +685,7 @@ start:
 		;Check if player has lost(enemies has reached the player on the Y axis)
 		MOV		DX, [GameEnemiesLowestEnemy]
 		ADD		DX,	GameEnemySizeY
-		MOV		DI,	OFFSET GamePlayerPosY
-		CMP		DX, [DI]
+		CMP		DX, GamePlayerPosY
 		JAE		CheckGameStatusPlayerLost
 
 		;If neither happend
@@ -763,20 +769,6 @@ start:
 		POPA
 		RET
 	ENDP Draw2D
-	
-	;Wait 55ms CX times
-	;Parameters: CX - times
-	PROC WaitIntervals
-		PUSHA
-		MOV		BX, [CLOCK]
-		WaitIntervalsLoop:
-			CMP		[CLOCK], BX
-			JE		WaitIntervalsLoop
-			MOV		BX, [CLOCK]
-			LOOP 	WaitIntervalsLoop
-		POPA
-		RET
-	ENDP
 
 	;/------------------------------------------------------------------\
 	;|							Malloc									|
