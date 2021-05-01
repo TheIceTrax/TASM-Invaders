@@ -1,12 +1,18 @@
 ;                   MODIFIABLE VARIABLES
 ;       May be changed in order to mess around with the game difficulty
-        GameEnemySpeed				EQU 7D			;How many pixel does the enemies move each time.					Default: 4D
-        GamePlayerBulletSpeed		EQU 1D			;How many pixel does the enemies move each time.					Default: 1D
+        GameEnemySpeed				EQU 7D			;How many pixels does the enemies move each time.					Default: 4D
+        GamePlayerBulletSpeed		EQU 1D			;How many pixels does the player's bullets move each time.			Default: 1D
+		GamePlayerSpeed 			EQU 2D			;How many pixels does the player move each time						Default: 2D
         GamePlayerBulletsLimit		EQU 3D			;How many bullets are allowed to be on the screen on once.			Default: 5D
         GameEnemyStartingAmmount	EQU 15D			;How many enemies on the start.										Default: 12D
         GamePlayerPosY				EQU 160D		;The player Y coordinate (constant throu the game).					Default: 160D
         GameEnemyMarginX			EQU 20D			;The margin (in pixels) on the X axis between 1 enemy to another.	Default: 20D
         GameEnemyMarginY			EQU 30D			;The margin (in pixels) on the Y axis between 1 enemy to another.	Default: 20D
+
+		RIGHT_KEY 					EQU 77D			;The button that moves the player to the right						Default: 77D (right arrow)
+		LEFT_KEY  					EQU 75D			;The button that moves the player to the left						Default: 75D (left arrow)
+		PAUSE_KEY  					EQU 1D			;The button that pauses the game									Default: 1D (ESC)
+		SHOOTING_KEY 				EQU 57D			;The button that moves the player to the right						Default: 57D (SPACEBAR)
 ;        Modifiable but not recommended
 ;        You may change these values, but they may cause a bit of problems
 
@@ -44,7 +50,6 @@ BackgroundColor EQU 0D
 GamePlayerPosX DW 160D
 GamePlayerSizeX  EQU 18D
 GamePlayerSizeY  EQU 9D
-GamePlayerSpeed DW 2D
 GamePlayerClear DB 0D
 
 ;Player Bullet
@@ -99,7 +104,3 @@ Draw2DPosX  dw ?
 Draw2DPosY  dw ?
 Draw2DClear db 0
 
-RIGHT_KEY EQU 77D
-LEFT_KEY  EQU 75D
-ESC_KEY  EQU 1D
-SPACEBAR EQU 39H
