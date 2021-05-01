@@ -1,7 +1,7 @@
 IDEAL
     MODEL small
     STACK 100h
-    p386
+    p486
 DATASEG
 	INCLUDE	"IMAGES.DAT"
 	INCLUDE	"VARS.DAT"
@@ -186,7 +186,7 @@ PROC Game
 				GameEnemyMovementHandlerGoDown:
 					XOR		[GameEnemyFirstDirection], 1D ;Swap the direction
 					
-					MOV		DX, [GameEnemyMarginY]
+					MOV		DX, GameEnemyMarginY
 					ADD		[GameEnemyFirstY], DX
 				GameEnemyMovementDraw:
 					CALL 	DrawEnemies
@@ -253,10 +253,10 @@ start:
 		;BL - direction
 		;CX - ammount of enemies
 		;DX - general use, mostly for positions
-		MOV		DX, [GameEnemySizeX]
+		MOV		DX, GameEnemySizeX
 		MOV		[Draw2DSizeX], DX
 		
-		MOV		DX, [GameEnemySizeY]
+		MOV		DX, GameEnemySizeY
 		MOV		[Draw2DSizeY], DX
 		
 		XOR		BX, BX
@@ -282,13 +282,13 @@ start:
 			CMP		BL,	1 ;Check the direction of the enemy
 			JE 		DrawEnemiesMoveLeft
 			;If right
-			ADD		DX, [GameEnemyMarginX]
-			ADD		DX, [GameEnemySizeX]
+			ADD		DX, GameEnemyMarginX
+			ADD		DX, GameEnemySizeX
 			JMP		DrawEnemiesPostMovement
 			DrawEnemiesMoveLeft:
 				;If left
-				SUB		DX, [GameEnemyMarginX]
-				SUB		DX, [GameEnemySizeX]
+				SUB		DX, GameEnemyMarginX
+				SUB		DX, GameEnemySizeX
 				
 			DrawEnemiesPostMovement:
 				;Check if on borders
@@ -313,26 +313,35 @@ start:
 					MOV		[Draw2DPosX], AX
 					
 					XOR		BL, 1; Swap direction
-					MOV		DX,	[GameEnemyMarginY]
+					MOV		DX,	GameEnemyMarginY
 					ADD		[Draw2DPosY],DX
 					MOV		[GameEnemiesLowestEnemy], DX
 				
 				DrawEnemiesLoopLoop:
-					CALL 	Draw2D
 					
 					MOV		DI,	OFFSET GameEnemiesPosX
-					ADD		DI,	GameEnemiesPosPointer
+					ADD		DI,	[GameEnemiesPosPointer]
+					CMP		[WORD PTR DI], GameEnemyDeadFlag
+					JE		DrawEnemiesLoopLoopEnd
+					CALL 	Draw2D
 					MOV		DX, [Draw2DPosX]
 					MOV		[DI], DX
 
 					MOV		DI, OFFSET GameEnemiesPosY
-					ADD		DI, GameEnemiesPosPointer
+					ADD		DI, [GameEnemiesPosPointer]
 					MOV		DX, [Draw2DPosY]
 					MOV		[DI], DX
-					
-					ADD 	[GameEnemiesPosPointer], 2
-					
-					LOOP 	DrawEnemiesDrawLoop
+							
+					DrawEnemiesLoopLoopEnd:
+						ADD 	[GameEnemiesPosPointer], 2
+
+						CMP		CX, 1
+						JE		DrawEnemiesEnd
+						DEC		CX
+						;Bypass conditonal jump limit
+						JMP		DrawEnemiesDrawLoop
+		DrawEnemiesEnd:
+		
 		POPA
 		RET
 	ENDP DrawEnemies
@@ -341,21 +350,120 @@ start:
 	PROC EnemiesCollision
 		PUSHA
 		MOV		CX, GamePlayerBulletsLimit
+		DEC		CX
+		SHL		CX,1 ;Multiply by 2, sience the loop will decrease by 2 each iteration
 		EnemiesCollisionLoop:
 			MOV		DI, OFFSET GamePlayerBulletsPosY
-			ADD		DI, CL
-			ADD		DI, CL;Because of DW
-			
+			ADD		DI, CX
+			;If bullet does not exist
+			CMP		[WORD  PTR DI], GamePlayerBulletDeletedFlagPos
+			JE		EnemiesCollisionLoopEnd
+
 			MOV		DX, [GameEnemiesLowestEnemy]
+			ADD		DX, GameEnemySizeY
 			CMP		[DI],DX
-			JAE 	EnemiesCollisionLoopEnd ;if the bullet has not reached the lowest enemy, skip the check
+			JAE	 	EnemiesCollisionLoopEnd ;if the bullet has not reached the lowest enemy, skip the check
+			MOV		BX, GameEnemyStartingAmmount
+			DEC		BX
+			SHL		BX, 1		
+			EnemiesCollisionLoopCheckEnemiesLoop:
+				;SI - Enemy position pointer
+				;DI - bullet pointer
+				;BX - Enemy counter
+				;DX - General Values
+				;Much more efficent to first check Y then X than the other way around.
+				EnemiesCollisionCheckY:
+					MOV		DI, OFFSET GamePlayerBulletsPosY
+					ADD		DI, CX					
 
-			;Could be collided
-			EnemiesCollisionLoopCheckEnemies:
-				MOV		SI, OFFSET 
+					MOV		SI, OFFSET GameEnemiesPosX
+					ADD		SI,	BX
+					MOV		DX, [SI]
+					ADD		DX, GameEnemySizeY
+					;DX = Bottom Y coordinate of enemy
+					;[DI] = Top Y coordinate of bullet
+					CMP		DX,[DI]
+					JA		EnemiesCollisionLoopCheckEnemiesLoopEnd
 
-			EnemiesCollisionLoop:
-				LOOP	EnemiesCollisionLoop
+					MOV		DX, [DI]
+					ADD		DX, GamePlayerBulletSizeY
+					;DX = Bottom Y coordinate of bullet
+					;[SI] = Top Y coordinate of enemy
+					CMP		DX, [SI]
+					JB		EnemiesCollisionLoopCheckEnemiesLoopEnd
+				
+				EnemiesCollisionCheckX:
+					MOV		DI, OFFSET GamePlayerBulletsPosX
+					ADD		DI, CX
+					
+					MOV		SI, OFFSET GameEnemiesPosX
+					ADD		SI, BX
+
+					;Check if enemy is alive
+					CMP		[WORD PTR SI],GameEnemyDeadFlag
+					JE		EnemiesCollisionLoopCheckEnemiesLoopEnd
+					MOV		DX, [SI]
+					CMP		[DI],	DX 
+					JB		EnemiesCollisionLoopCheckEnemiesLoopEnd
+					ADD		DX, GameEnemySizeX
+					CMP		DX, BX
+					JA		EnemiesCollisionLoopCheckEnemiesLoopEnd
+
+				;TODO: Rework logic to collide
+
+					EnemiesCollisionCollide:
+						;Remove bullet data & sprite
+						MOV		SI, OFFSET PlayerBullet
+
+						MOV		DI, OFFSET GamePlayerBulletsPosY
+						ADD		DI, CX
+						MOV		DX, [DI]
+						MOV		[Draw2DPosY], DX
+						MOV		[WORD PTR DI], GamePlayerBulletDeletedFlagPos
+
+						MOV		DI, OFFSET GamePlayerBulletsPosX
+						ADD		DI, CX
+						MOV		DX, [DI]
+						MOV		[Draw2DPosX], DX
+						MOV		[WORD PTR DI], GamePlayerBulletDeletedFlagPos
+
+						MOV		[Draw2DSizeX], GamePlayerBulletSizeX
+						MOV		[Draw2DSizeY], GamePlayerBulletSizeY
+						MOV		[Draw2DClear], 1
+						CALL	Draw2D
+						
+						DEC		[GamePlayerCurrentBullets]
+						;Remove enemy data & sprite
+						MOV		SI, OFFSET EnemyModel
+
+						MOV		DI, OFFSET GameEnemiesPosX
+						ADD		DI, BX
+						MOV		DX, [DI]
+						MOV		[Draw2DPosX], DX
+						MOV		[WORD PTR DI], GameEnemyDeadFlag
+
+						MOV		DI, OFFSET GameEnemiesPosY
+						ADD		DI, BX
+						MOV		DX, [DI]
+						MOV		[Draw2DPosY], DX
+						MOV		[WORD PTR DI], GameEnemyDeadFlag
+
+						MOV		[Draw2DSizeX], GameEnemySizeX
+						MOV		[Draw2DSizeY], GameEnemySizeY
+						;Draw2Dclear is already 1 in memory
+						CALL	Draw2D
+
+
+				EnemiesCollisionLoopCheckEnemiesLoopEnd:
+					SUB		BX, 2
+					CMP		BX, 0
+					JGE		EnemiesCollisionLoopCheckEnemiesLoop
+			EnemiesCollisionLoopEnd:
+				CMP		CX, 1
+				JLE		EnemiesCollisionEnd
+				SUB		CX,2
+				JMP		EnemiesCollisionLoop
+		EnemiesCollisionEnd:
 		POPA
 		RET
 	ENDP EnemiesCollision
@@ -454,6 +562,7 @@ start:
 		MOV		CL, [GamePlayerCurrentBullets]
 		CMP		CL, 0
 		JZ		MovePlayerBulletEnd
+		CALL	EnemiesCollision
 		MOV		CL, 0
 		MovePlayerBulletLoop:
 			;CLEAR THE BULLET
@@ -485,7 +594,7 @@ start:
 			;GamePlayerBulletsPosY adress
 			
 			POP 	DI
-			SUB		[DI], GamePlayerBulletSpeed
+			SUB		[WORD PTR DI], GamePlayerBulletSpeed
 			MOV		DX, [DI]
 			CMP		DX, GameBorderStartY
 			JL		MovePlayerBulletDeleteBullet
@@ -499,11 +608,11 @@ start:
 			MovePlayerBulletDeleteBullet:
 				MOV		DI, OFFSET GamePlayerBulletsPosX
 				ADD		DI, CX
-				MOV		[DI], GamePlayerBulletDeletedFlagPos
+				MOV		[WORD PTR DI], GamePlayerBulletDeletedFlagPos
 			
 				MOV		DI, OFFSET GamePlayerBulletsPosY
 				ADD		DI, CX
-				MOV		[DI], GamePlayerBulletDeletedFlagPos
+				MOV		[WORD PTR DI], GamePlayerBulletDeletedFlagPos
 
 				DEC		[GamePlayerCurrentBullets]
 			MovePlayerBulletLoopEnd:

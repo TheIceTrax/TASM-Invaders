@@ -43,22 +43,23 @@ GamePlayerBulletDelay EQU 2000D
 
 GamePlayerBulletSpeed EQU 1
 ;Enemy
-GameEnemySizeX DW 22D
-GameEnemySizeY DW 18D
+GameEnemySizeX EQU 22D
+GameEnemySizeY EQU 18D
 
 GameEnemyFirstX DW 0D
 GameEnemyFirstY DW 0D
 
-GameEnemyMarginX DW 10D
-GameEnemyMarginY DW 30D
+GameEnemyMarginX EQU 10D
+GameEnemyMarginY EQU 30D
 
 GameEnemyFirstDirection DB 0 ; 1 - left, 0 - right
 
 GameEnemyStartingAmmount EQU 12D
 GameEnemyCount DB GameEnemyStartingAmmount
 
-GameEnemiesPosX DW GameEnemyStartingAmmount DUP(0) ;Doesn't really matter, values will get wiped the moment the game starts
-GameEnemiesPosY DW GameEnemyStartingAmmount DUP(0)
+GameEnemiesPosX DW GameEnemyStartingAmmount DUP(?) ;Doesn't really matter, values will get wiped the moment the game starts
+GameEnemiesPosY DW GameEnemyStartingAmmount DUP(?)
+GameEnemyDeadFlag EQU 1234 ;
 GameEnemiesLowestEnemy DW 0
 
 GameEnemiesPosPointer DW 0;Waste of memory but it is required in order to work with DI
