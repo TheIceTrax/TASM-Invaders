@@ -22,5 +22,5 @@ tlink /v GAME.obj
 To start the game simply run `GAME`.
 
 # Customizing the game
-The file "VARS.dat" (Located at game) contains variables that you may change in order to change your expirience.
+The file "VARS.dat" (Located at game) contains variables that you may change in order to make the game harder\easier.
 ![Modifiable variables](https://github.com/TheIceTrax/TASM-SpaceInvaders/blob/guide/vars.png?raw=true "Modifiable variables")
