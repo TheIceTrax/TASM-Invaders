@@ -83,9 +83,11 @@ GameEnemyFirstDirection DB 0 ; 1 - left, 0 - right
 
 GameEnemyCount DB GameEnemyStartingAmmount
 
+
 GameEnemiesPosX DW GameEnemyStartingAmmount DUP(?) ;Doesn't really matter as values will get wiped the moment the game starts
 GameEnemiesPosY DW GameEnemyStartingAmmount DUP(?)
 GameEnemyDeadFlag EQU 1234
+
 GameEnemiesLowestEnemy DW 0
 
 GameEnemiesPosPointer DW 0;Waste of memory but it is required in order to work with DI

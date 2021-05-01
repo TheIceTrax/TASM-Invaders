@@ -355,6 +355,7 @@ start:
 					
 					MOV		DI,	OFFSET GameEnemiesPosX
 					ADD		DI,	[GameEnemiesPosPointer]
+          
 					CMP		[WORD PTR DI], GameEnemyDeadFlag
 					JE		DrawEnemiesLoopLoopEnd
 					
@@ -390,6 +391,7 @@ start:
 		EnemiesCollisionLoop:
 			MOV		DI, OFFSET GamePlayerBulletsPosY
 			ADD		DI, CX
+
 			;If bullet does not exist
 			CMP		[WORD  PTR DI], GamePlayerBulletDeletedFlagPos
 			JE		EnemiesCollisionLoopEnd
@@ -398,6 +400,7 @@ start:
 			MOV		DX, [GameEnemiesLowestEnemy]
 			ADD		DX, GameEnemySizeY
 			CMP		[DI],DX
+
 			JAE	 	EnemiesCollisionLoopEnd 
 			
 			;Setup BX to be the counter of the enemies loop
@@ -514,6 +517,7 @@ start:
 					JGE		EnemiesCollisionLoopCheckEnemiesLoop
 			EnemiesCollisionLoopEnd:
 				CMP		CX, 0
+        
 				JL		EnemiesCollisionEnd
 				SUB		CX,2
 				JMP		EnemiesCollisionLoop
