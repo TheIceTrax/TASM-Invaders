@@ -21,7 +21,7 @@ ENDP HelpMenu
 ;|							StartMenu								|
 ;| 					CALLS THE START MENU.							|
 ;|							ARGUMENTS:								|
-;| DX - MENU TYPE: 0 = DEFUALT, 1 = NO INTRO, 2 = GAME OVER			|
+;| 			DX - MENU TYPE: 0 = Welcome, 1 = PAUSED					|
 ;\------------------------------------------------------------------/
 PROC StartMenu
 	;TEXT MODE
@@ -32,18 +32,32 @@ PROC StartMenu
 	XOR		AX,	AX
 	MOV		AH, 9H
 	PUSH 	DX
-	CMP 	DX, 0
-	JNE		StartMenuPostIntro
-	;Print intro
+	;Check what type of intro to print
+	CMP 	DX, 1
+	JE		StartMenuPaused
+	;Print the welcome version
 	MOV		DX, OFFSET INTRO
 	INT 	21H
-	;Print game title screen
-StartMenuPostIntro:
+
+	MOV 	DX,	OFFSET TitleScreenMessageWelcome
+	INT 	21H
+	
+	MOV 	DX,	OFFSET TitleScreenStart
+	INT 	21H
+	JMP		StartMenuPostIntro
+	;Print the paused version
+	StartMenuPaused:
+		MOV		DX, OFFSET PAUSED
+		INT 	21H
+
+		MOV 	DX,	OFFSET TitleScreenMessagePaused
+		INT 	21H
+
+		MOV 	DX,	OFFSET TitleScreenResume
+		INT 	21H
+		;Print game options
+	StartMenuPostIntro:
 		
-		MOV 	DX,	OFFSET TitleScreenMessage
-		INT 	21H
-		MOV 	DX,	OFFSET TitleScreenStart
-		INT 	21H
 		MOV 	DX,	OFFSET TitleScreenHelp
 		INT 	21H
 		MOV 	DX,	OFFSET TitleScreenExit
@@ -64,7 +78,6 @@ StartMenuPostIntro:
 		JE		Exit
 		
 		CALL 	StartMenu
-	
 	RET
 ENDP StartMenu
 
@@ -359,36 +372,48 @@ start:
 			CMP		[WORD  PTR DI], GamePlayerBulletDeletedFlagPos
 			JE		EnemiesCollisionLoopEnd
 
+			;if the bullet has not reached the lowest enemy, skip the check
 			MOV		DX, [GameEnemiesLowestEnemy]
 			ADD		DX, GameEnemySizeY
 			CMP		[DI],DX
-			JAE	 	EnemiesCollisionLoopEnd ;if the bullet has not reached the lowest enemy, skip the check
+			JAE	 	EnemiesCollisionLoopEnd 
+			
+			;Setup BX to be the counter of the enemies loop
 			MOV		BX, GameEnemyStartingAmmount
 			DEC		BX
-			SHL		BX, 1		
+			SHL		BX, 1
+
 			EnemiesCollisionLoopCheckEnemiesLoop:
 				;SI - Enemy position pointer
 				;DI - bullet pointer
+				;CX - Bullet counter
 				;BX - Enemy counter
 				;DX - General Values
-				;Much more efficent to first check Y then X than the other way around.
-				EnemiesCollisionCheckY:
-					MOV		DI, OFFSET GamePlayerBulletsPosY
-					ADD		DI, CX					
 
-					MOV		SI, OFFSET GameEnemiesPosX
+				EnemiesCollisionCheckY:
+					;Useless moving (already setted)
+					;MOV		DI, OFFSET GamePlayerBulletsPosY
+					;ADD		DI, CX	
+
+					MOV		SI, OFFSET GameEnemiesPosY
 					ADD		SI,	BX
 					MOV		DX, [SI]
-					ADD		DX, GameEnemySizeY
+					;Check if enemy is already dead
+					CMP		DX,GameEnemyDeadFlag
+					JE		EnemiesCollisionLoopCheckEnemiesLoopEnd
+
 					;DX = Bottom Y coordinate of enemy
 					;[DI] = Top Y coordinate of bullet
-					CMP		DX,[DI]
+					;Check if bullet is under enemy
+					ADD		DX, GameEnemySizeY
+					CMP		[DI], DX
 					JA		EnemiesCollisionLoopCheckEnemiesLoopEnd
 
-					MOV		DX, [DI]
-					ADD		DX, GamePlayerBulletSizeY
 					;DX = Bottom Y coordinate of bullet
 					;[SI] = Top Y coordinate of enemy
+					;Check if bullet is above enemy
+					MOV		DX, [DI]
+					ADD		DX, GamePlayerBulletSizeY
 					CMP		DX, [SI]
 					JB		EnemiesCollisionLoopCheckEnemiesLoopEnd
 				
@@ -398,15 +423,21 @@ start:
 					
 					MOV		SI, OFFSET GameEnemiesPosX
 					ADD		SI, BX
-
-					;Check if enemy is alive
-					CMP		[WORD PTR SI],GameEnemyDeadFlag
-					JE		EnemiesCollisionLoopCheckEnemiesLoopEnd
-					MOV		DX, [SI]
-					CMP		[DI],	DX 
+					
+					;DX 	- Right X coordinate of the bullet
+					;[SI]	- Left X coordinate of the enemy
+					;Checks if the the bullet is left to the enemy
+					MOV		DX, [DI]
+					ADD		DX,	GamePlayerBulletSizeX
+					CMP		DX, [SI]
 					JB		EnemiesCollisionLoopCheckEnemiesLoopEnd
+
+					;DX		- right X coordinate of the enemy
+					;[DI]	- left X coordinate of the bullet
+					;Checks if the the bullet is left to the enemy
+					MOV		DX, [SI]
 					ADD		DX, GameEnemySizeX
-					CMP		DX, BX
+					CMP		[DI], DX
 					JA		EnemiesCollisionLoopCheckEnemiesLoopEnd
 
 				;TODO: Rework logic to collide
