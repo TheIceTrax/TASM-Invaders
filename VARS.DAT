@@ -37,6 +37,10 @@ TitleScreenStartCHR EQU '1'
 TitleScreenHelpCHR EQU '2'
 TitleScreenExitCHR EQU '3'
 
+;Help menu
+HelpMenuHowToPlay   DB "By default, you move using the arrow keys (right and left) and shoot using spacebar",10,13
+                    DB "Your objective is to kill all the aliens before they reach you.",10,13
+                    DB "Press any key to return",10,13,'$'
 ;		GAME VARIABLES
 ;GAME
 GameBorderStartX EQU 0D
