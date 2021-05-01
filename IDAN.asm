@@ -17,6 +17,7 @@ PROC HelpMenu
 	MOV		AH, 01D
 	INT 	21H
 	POPA
+	CALL	StartMenu
 	RET
 ENDP HelpMenu
 
@@ -110,10 +111,10 @@ PROC Game
 		CMP		AH, LEFT_KEY
 		JE		GameMoveLEFT
 		
-		CMP		AH, ESC_KEY
+		CMP		AH, PAUSE_KEY
 		JE		GameESC
 		
-		CMP		AH, SPACEBAR
+		CMP		AH, SHOOTING_KEY
 		JE 		GamePlayerShootingHandler
 		
 		JMP		GamePlayerMovementHandlerEND
@@ -127,7 +128,7 @@ PROC Game
 			CALL 	DrawPlayer
 			
 			MOV		[GamePlayerClear], 0
-			MOV		BX,	[GamePlayerSpeed]
+			MOV		BX,	GamePlayerSpeed
 			ADD 	[GamePlayerPosX], BX
 			CALL 	DrawPlayer
 			JMP 	GamePlayerMovementHandlerEND
@@ -140,7 +141,7 @@ PROC Game
 			MOV		[GamePlayerClear], 1D
 			CALL 	DrawPlayer
 			MOV		[GamePlayerClear], 0
-			MOV		BX,	[GamePlayerSpeed]
+			MOV		BX,	GamePlayerSpeed
 			SUB 	[GamePlayerPosX], BX
 			CALL 	DrawPlayer
 			JMP 	GamePlayerMovementHandlerEND
@@ -343,6 +344,10 @@ start:
 					
 					XOR		BL, 1; Swap direction
 					ADD		[Draw2DPosY], GameEnemyMarginY
+					MOV		DI,	OFFSET GameEnemiesPosX
+					ADD		DI,	[GameEnemiesPosPointer]
+					CMP		[WORD PTR DI], GameEnemyDeadFlag
+					JE		DrawEnemiesLoopLoopEnd
 					MOV		DX, [Draw2DPosY]	
 					MOV		[GameEnemiesLowestEnemy], DX
 				
@@ -352,6 +357,7 @@ start:
 					ADD		DI,	[GameEnemiesPosPointer]
 					CMP		[WORD PTR DI], GameEnemyDeadFlag
 					JE		DrawEnemiesLoopLoopEnd
+					
 					CALL 	Draw2D
 					MOV		DX, [Draw2DPosX]
 					MOV		[DI], DX
