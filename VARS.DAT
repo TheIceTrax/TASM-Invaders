@@ -1,10 +1,31 @@
+;                   MODIFIABLE VARIABLES
+;       May be changed in order to mess around with the game difficulty
+        GameEnemySpeed				EQU 7D			;How many pixel does the enemies move each time.					Default: 4D
+        GamePlayerBulletSpeed		EQU 1D			;How many pixel does the enemies move each time.					Default: 1D
+        GamePlayerBulletsLimit		EQU 3D			;How many bullets are allowed to be on the screen on once.			Default: 5D
+        GameEnemyStartingAmmount	EQU 15D			;How many enemies on the start.										Default: 12D
+        GamePlayerPosY				EQU 160D		;The player Y coordinate (constant throu the game).					Default: 160D
+        GameEnemyMarginX			EQU 20D			;The margin (in pixels) on the X axis between 1 enemy to another.	Default: 20D
+        GameEnemyMarginY			EQU 30D			;The margin (in pixels) on the Y axis between 1 enemy to another.	Default: 20D
+;        Modifiable but not recommended
+;        You may change these values, but they may cause a bit of problems
+
+        GamePlayerShootingDelay		EQU	15000D		;How many Cycles will the game wait before letting the player shoot (affects rate of fire)					Default: 20000D
+        GameEnemyMovemntCycles      EQU 20000D      ;How many cycles will the game wait before moving the enemy (affects the speed of the enemies) 				Default: 20000D
+		GamePlayerBulletDelay       EQU 2000D		;How many cycles will the game wait before moving the player bullet (affects the speed of the bullet)		Default: 2000D
+
+
+
+;               NON MODIFIABLE VARIABLES!
+;       Modifying these values will very likely break the game
+
 ;			TITLE SCREEN VARIABLES
 TitleScreenMessageWelcome  DB 	"________________________________________________________________________",10,13,"				WELCOME!",10,13,10,13,'$'
 TitleScreenMessagePaused   DB 	"________________________________________________________________________",10,13,"				PAUSED!",10,13,10,13,'$'
-TitleScreenStart DB 	"			1 - Start game!",10,13,'$'
-TitleScreenResume DB 	"			1 - Resume game!",10,13,'$'
-TitleScreenHelp DB 		"			2 - How do i play?",10,13, '$'
-TitleScreenExit DB 		"			3 - Exit",10,13,'$'
+TitleScreenStart DB 	"			",TitleScreenStartCHR," - Start game!",10,13,'$'
+TitleScreenResume DB 	"			",TitleScreenStartCHR," - Resume game!",10,13,'$'
+TitleScreenHelp DB 		"			",TitleScreenHelpCHR," - How do i play?",10,13, '$'
+TitleScreenExit DB 		"			",TitleScreenExitCHR," - Exit",10,13,'$'
 
 TitleScreenStartCHR EQU '1'
 TitleScreenHelpCHR EQU '2'
@@ -21,7 +42,6 @@ GameCurrentStatusDelayCycles DW 0D
 BackgroundColor EQU 0D
 ;Player
 GamePlayerPosX DW 160D
-GamePlayerPosY DW 170D
 GamePlayerSizeX  EQU 18D
 GamePlayerSizeY  EQU 9D
 GamePlayerSpeed DW 2D
@@ -29,7 +49,6 @@ GamePlayerClear DB 0D
 
 ;Player Bullet
 GamePlayerCurrentBullets DB 0
-GamePlayerBulletsLimit EQU 5
 
 GamePlayerBulletDeletedFlagPos EQU 0
 
@@ -42,10 +61,9 @@ GamePlayerBulletMarginX EQU 1D
 GamePlayerBulletSizeX EQU 4D
 GamePlayerBulletSizeY EQU 10D
 
-GamePlayerBulletTimer DW 0			;Probably useless, will get deleted if needed
-GamePlayerBulletDelay EQU 2000D
+GamePlayerBulletTimer DW 0
+GamePlayerShootingDelayCurrent DW GamePlayerShootingDelay
 
-GamePlayerBulletSpeed EQU 1
 ;Enemy
 GameEnemySizeX EQU 22D
 GameEnemySizeY EQU 18D
@@ -53,12 +71,11 @@ GameEnemySizeY EQU 18D
 GameEnemyFirstX DW 0D
 GameEnemyFirstY DW 0D
 
-GameEnemyMarginX EQU 10D
-GameEnemyMarginY EQU 30D
+
 
 GameEnemyFirstDirection DB 0 ; 1 - left, 0 - right
 
-GameEnemyStartingAmmount EQU 4D; Defualt: 12D
+
 GameEnemyCount DB GameEnemyStartingAmmount
 
 GameEnemiesPosX DW GameEnemyStartingAmmount DUP(?) ;Doesn't really matter as values will get wiped the moment the game starts
@@ -67,9 +84,7 @@ GameEnemyDeadFlag EQU 1234
 GameEnemiesLowestEnemy DW 0
 
 GameEnemiesPosPointer DW 0;Waste of memory but it is required in order to work with DI
-GameEnemySpeed EQU 3D ;Defualt: 3D
 
-GameEnemyMovemntCycles EQU 20000D
 GameEnemyCurrentMovementCycles DW 0D
 
 DrawEnemiesClear DB 0D
@@ -84,7 +99,6 @@ Draw2DPosX  dw ?
 Draw2DPosY  dw ?
 Draw2DClear db 0
 
-CLOCK EQU es:6Ch
 RIGHT_KEY EQU 77D
 LEFT_KEY  EQU 75D
 ESC_KEY  EQU 1D
