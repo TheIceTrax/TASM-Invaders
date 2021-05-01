@@ -14,6 +14,8 @@ PROC HelpMenu
 	MOV		AH, 9H
 	MOV		DX, OFFSET Help_Title
 	INT 	21H
+	MOV		DX, OFFSET HelpMenuHowToPlay
+	INT 	21H
 	MOV		AH, 01D
 	INT 	21H
 	POPA
@@ -176,9 +178,6 @@ PROC Game
 			CMP		[GameEnemyCurrentMovementCycles], GameEnemyMovemntCycles
 			JB		GameEnemyMovementHandlerEND	
 			
-			;Clock solution - currently broken
-			;MOV		CX, 1
-			;CALL	WaitIntervals
 			;If needs to move enemies
 			
 			MOV		[GameEnemyCurrentMovementCycles], 0D 
@@ -355,7 +354,7 @@ start:
 					
 					MOV		DI,	OFFSET GameEnemiesPosX
 					ADD		DI,	[GameEnemiesPosPointer]
-          
+
 					CMP		[WORD PTR DI], GameEnemyDeadFlag
 					JE		DrawEnemiesLoopLoopEnd
 					
@@ -557,7 +556,8 @@ start:
 		POPA
 		RET
 	ENDP DrawPlayer
-	;if player want to shoot, let them shoot!
+  
+	;Shoots a bullet
 	PROC PlayerShoot
 		PUSHA
 		;Check if can shoot (Number of bullets is not over the limit)
@@ -623,7 +623,7 @@ start:
 		CALL	EnemiesCollision
 		MOV		CL, 0
 		MovePlayerBulletLoop:
-			;CLEAR THE BULLET
+			;Clear bullet
 			MOV		DI, OFFSET GamePlayerBulletsPosX
 			ADD		DI, CX
 			MOV		DX, [DI]
@@ -684,8 +684,9 @@ start:
 			POPA
 			RET
 	ENDP MovePlayerBullets
+
 	;Check if player has either won or lost
-	
+
 	PROC CheckGameStatus
 		PUSHA
 		;Check if player has won
@@ -710,6 +711,7 @@ start:
 			POPA
 			RET
 	ENDP CheckGameStatus
+
 	;/------------------------------------------------------------------\
 	;|							GameOver								|
 	;| 						Finishes the game							|
