@@ -2,7 +2,7 @@
 A simple Space Invaders like game made in 16BIT Assembly.
 
 You are a spaceship and you need to shoot aliens. If the aliens reaches you you die.
-![Main Menu](https://github.com/TheIceTrax/TASM-SpaceInvaders/blob/images/Gameplay.png?raw=true)
+![Main Menu](https://github.com/TheIceTrax/TASM-SpaceInvaders/blob/IMAGES/Gameplay.png?raw=true)
 # How to install
 ## Windows
 Download the package in Releases, unzip and run "dosbox.exe".
@@ -23,4 +23,4 @@ To start the game simply run `GAME`.
 
 # Customizing the game
 The file "VARS.dat" (Located at game) contains variables that you may change in order to make the game harder\easier.
-![Modifiable variables](https://github.com/TheIceTrax/TASM-SpaceInvaders/blob/images/vars.png?raw=true "Modifiable variables")
+![Modifiable variables](https://github.com/TheIceTrax/TASM-SpaceInvaders/blob/IMAGES/vars.png?raw=true "Modifiable variables")
