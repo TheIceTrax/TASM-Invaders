@@ -399,8 +399,7 @@ start:
 			MOV		DX, [GameEnemiesLowestEnemy]
 			ADD		DX, GameEnemySizeY
 			CMP		[DI],DX
-
-			JAE	 	EnemiesCollisionLoopEnd 
+			JA	 	EnemiesCollisionLoopEnd 
 			
 			;Setup BX to be the counter of the enemies loop
 			MOV		BX, GameEnemyStartingAmmount
@@ -415,7 +414,6 @@ start:
 				;DX - General Values
 
 				EnemiesCollisionCheckY:
-					;Useless moving (already setted)
 					MOV		DI, OFFSET GamePlayerBulletsPosY
 					ADD		DI, CX	
 
@@ -463,8 +461,6 @@ start:
 					ADD		DX, GameEnemySizeX
 					CMP		[DI], DX
 					JA		EnemiesCollisionLoopCheckEnemiesLoopEnd
-
-				;TODO: Rework logic to collide
 
 					EnemiesCollisionCollide:
 						;Remove bullet data & sprite
