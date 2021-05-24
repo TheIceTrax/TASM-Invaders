@@ -1,24 +1,24 @@
 ;                   MODIFIABLE VARIABLES
 ;       May be changed in order to mess around with the game difficulty
-        GameEnemySpeed				EQU 7D			;How many pixels does the enemies move each time.					Default: 7D
-        GamePlayerBulletSpeed		EQU 1D			;How many pixels does the player's bullets move each time.			Default: 1D
-		GamePlayerSpeed 			EQU 10D			;How many pixels does the player move each time						Default: 10D
-        GamePlayerBulletsLimit		EQU 3D			;How many bullets are allowed to be on the screen on once.			Default: 3D
-        GameEnemyStartingAmmount	EQU 15D			;How many enemies on the start.										Default: 15D
-        GamePlayerPosY				EQU 160D		;The player Y coordinate (constant throu the game).					Default: 160D
+        GameEnemySpeed				EQU 7D			;How many pixels does the enemies move each time.			Default: 7D
+        GamePlayerBulletSpeed			EQU 1D			;How many pixels does the player's bullets move each time.		Default: 1D
+	GamePlayerSpeed 			EQU 10D			;How many pixels does the player move each time				Default: 10D
+        GamePlayerBulletsLimit			EQU 3D			;How many bullets are allowed to be on the screen on once.		Default: 3D
+        GameEnemyStartingAmmount		EQU 15D			;How many enemies on the start.						Default: 15D
+        GamePlayerPosY				EQU 160D		;The player Y coordinate (constant throu the game).			Default: 160D
         GameEnemyMarginX			EQU 20D			;The margin (in pixels) on the X axis between 1 enemy to another.	Default: 20D
         GameEnemyMarginY			EQU 30D			;The margin (in pixels) on the Y axis between 1 enemy to another.	Default: 30D
 
-		RIGHT_KEY 					EQU 77D			;The button that moves the player to the right						Default: 77D (right arrow)
-		LEFT_KEY  					EQU 75D			;The button that moves the player to the left						Default: 75D (left arrow)
-		PAUSE_KEY  					EQU 1D			;The button that pauses the game									Default: 1D (ESC)
-		SHOOTING_KEY 				EQU 57D			;The button that moves the player to the right						Default: 57D (SPACEBAR)
+	RIGHT_KEY				EQU 77D			;The button that moves the player to the right				Default: 77D (right arrow)
+	LEFT_KEY 				EQU 75D			;The button that moves the player to the left				Default: 75D (left arrow)
+	PAUSE_KEY				EQU 1D			;The button that pauses the game					Default: 1D (ESC)
+	SHOOTING_KEY 				EQU 57D			;The button that moves the player to the right				Default: 57D (SPACEBAR)
 ;        Modifiable but not recommended
 ;        You may change these values, but they may cause a bit of problems
 
-        GamePlayerShootingDelay		EQU	15000D		;How many Cycles will the game wait before letting the player shoot (affects rate of fire)					Default: 20000D
-        GameEnemyMovemntCycles      EQU 20000D      ;How many cycles will the game wait before moving the enemy (affects the speed of the enemies) 				Default: 20000D
-		GamePlayerBulletDelay       EQU 2000D		;How many cycles will the game wait before moving the player bullet (affects the speed of the bullet)		Default: 2000D
+        GamePlayerShootingDelay		EQU	15000D	;How many Cycles will the game wait before letting the player shoot (affects rate of fire)			Default: 20000D
+        GameEnemyMovemntCycles      	EQU 20000D      ;How many cycles will the game wait before moving the enemy (affects the speed of the enemies) 			Default: 20000D
+	GamePlayerBulletDelay      	EQU 2000D	;How many cycles will the game wait before moving the player bullet (affects the speed of the bullet)		Default: 2000D
 
 
 
